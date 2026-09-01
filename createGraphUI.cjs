@@ -1,4 +1,9 @@
+const fs = require('fs');
+const path = require('path');
+const uiDir = 'app/(protected)/cases/[caseId]/graph';
+if (!fs.existsSync(uiDir)) fs.mkdirSync(uiDir, { recursive: true });
 
+fs.writeFileSync(path.join(uiDir, 'page.tsx'), `
 'use client';
 
 import { useState, useEffect, use } from 'react';
@@ -26,7 +31,7 @@ export default function GraphPage({ params }: { params: Promise<{ caseId: string
 
   const fetchGraph = async () => {
     try {
-      const res = await fetch(`/api/cases/${caseId}/graph`);
+      const res = await fetch(\`/api/cases/\${caseId}/graph\`);
       if (!res.ok) throw new Error('Failed to fetch graph');
       const data = await res.json();
       setNodes(data.nodes);
@@ -43,7 +48,7 @@ export default function GraphPage({ params }: { params: Promise<{ caseId: string
     setSubmittingNode(true);
     setError('');
     try {
-      const res = await fetch(`/api/cases/${caseId}/graph/nodes`, {
+      const res = await fetch(\`/api/cases/\${caseId}/graph/nodes\`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nodeForm)
@@ -63,7 +68,7 @@ export default function GraphPage({ params }: { params: Promise<{ caseId: string
     setSubmittingEdge(true);
     setError('');
     try {
-      const res = await fetch(`/api/cases/${caseId}/graph/edges`, {
+      const res = await fetch(\`/api/cases/\${caseId}/graph/edges\`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(edgeForm)
@@ -98,7 +103,7 @@ export default function GraphPage({ params }: { params: Promise<{ caseId: string
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-              <select id="nodeType" value={nodeForm.nodeType} onChange={e => setNodeForm({...nodeForm, nodeType: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+              <select value={nodeForm.nodeType} onChange={e => setNodeForm({...nodeForm, nodeType: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
                 <option value="PERSON">Person</option>
                 <option value="LOCATION">Location</option>
                 <option value="VEHICLE">Vehicle</option>
@@ -117,14 +122,14 @@ export default function GraphPage({ params }: { params: Promise<{ caseId: string
           <form onSubmit={handleCreateEdge} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Source Node</label>
-              <select id="fromNodeId" required value={edgeForm.fromNodeId} onChange={e => setEdgeForm({...edgeForm, fromNodeId: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+              <select required value={edgeForm.fromNodeId} onChange={e => setEdgeForm({...edgeForm, fromNodeId: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
                 <option value="">Select source...</option>
                 {nodes.map(n => <option key={n.id} value={n.id}>{n.label} ({n.nodeType})</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
-              <select id="relationship" value={edgeForm.relationship} onChange={e => setEdgeForm({...edgeForm, relationship: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+              <select value={edgeForm.relationship} onChange={e => setEdgeForm({...edgeForm, relationship: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
                 <option value="INVOLVED_IN">Involved In</option>
                 <option value="LINKED_TO">Linked To</option>
                 <option value="WITNESS_OF">Witness Of</option>
@@ -133,7 +138,7 @@ export default function GraphPage({ params }: { params: Promise<{ caseId: string
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Target Node</label>
-              <select id="toNodeId" required value={edgeForm.toNodeId} onChange={e => setEdgeForm({...edgeForm, toNodeId: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+              <select required value={edgeForm.toNodeId} onChange={e => setEdgeForm({...edgeForm, toNodeId: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm p-2 border">
                 <option value="">Select target...</option>
                 {nodes.map(n => <option key={n.id} value={n.id}>{n.label} ({n.nodeType})</option>)}
               </select>
@@ -185,3 +190,5 @@ export default function GraphPage({ params }: { params: Promise<{ caseId: string
     </div>
   );
 }
+`);
+console.log('Graph UI created');

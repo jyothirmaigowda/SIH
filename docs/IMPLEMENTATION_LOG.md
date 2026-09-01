@@ -52,3 +52,13 @@ pm run build completed successfully. Playwright smoke test (	ests/e2e/smoke.spec
   - Implemented Evidence Registry UI (cases/[caseId]/evidence/page.tsx) mapping evidence states (e.g. COLLECTED, TRANSFERRED).
   - Designed an interactive Timeline UI (cases/[caseId]/custody/page.tsx) rendering cryptographic hashes and mapping transfers to Employee IDs.
 - **Tests run:** E2E Playwright evidence.spec.ts completed perfectly (verifying UI rendering, custody transfers, and strict actor mapping).
+
+## Phase 4: Graph Engine (Nodes & Edges)
+- **Status:** COMPLETE
+- **Timestamp:** 2026-09-01T22:35:41
+- **Actions Taken:**
+  - Designed mapping routes: GET /api/cases/[caseId]/graph to pull entire structural mappings, and POST /nodes / POST /edges endpoints for building intelligence maps dynamically.
+  - Implemented Node insertion linking entities to cases (e.g. Persons, Locations, Evidence, Vehicles).
+  - Implemented Edge creation (e.g. INVOLVED_IN, LINKED_TO, WITNESS_OF) establishing topological relationships.
+  - Built the GraphPage interface (pp/(protected)/cases/[caseId]/graph/page.tsx), splitting layout between entity-management forms and a real-time Relational Map renderer.
+- **Tests run:** Created graph.spec.ts executing end-to-end creation of Suspect Nodes, Location Nodes, linking them via relationships, and verifying the DOM correctly represents the structural JSON mapping. Passed successfully.
