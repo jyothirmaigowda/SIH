@@ -41,3 +41,14 @@ pm run build completed successfully. Playwright smoke test (	ests/e2e/smoke.spec
   - Configured append-only audit events (DOCUMENT_UPLOADED, DOCUMENT_DOWNLOADED) embedding specific hashes.
   - Built the DocumentsPage UI client with Suspense boundaries.
 - **Tests run:** E2E Playwright testing suite (	ests/e2e/documents.spec.ts) achieved 100% pass rate executing file uploads, rendering verifications, replacement upload testing, and file download verifications via headless Chromium.
+
+## Phase 3: Evidence & Custody Chain
+- **Status:** COMPLETE
+- **Timestamp:** 2026-09-01T22:26:35
+- **Actions Taken:**
+  - Implemented pi/cases/[caseId]/evidence (GET/POST) to register physical/digital evidence with mandatory metadata (Source, Place, Time).
+  - Designed the immutable custody append route pi/evidence/[evidenceId]/custody (GET/POST) to log sequential evidence movements.
+  - Secured custody events using SHA-256 (eventHash) drawn directly from payload data and derived actors to enforce the append-only ledger constraint.
+  - Implemented Evidence Registry UI (cases/[caseId]/evidence/page.tsx) mapping evidence states (e.g. COLLECTED, TRANSFERRED).
+  - Designed an interactive Timeline UI (cases/[caseId]/custody/page.tsx) rendering cryptographic hashes and mapping transfers to Employee IDs.
+- **Tests run:** E2E Playwright evidence.spec.ts completed perfectly (verifying UI rendering, custody transfers, and strict actor mapping).
