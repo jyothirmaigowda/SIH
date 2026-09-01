@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Phase 1 will implement this endpoint.
-// Stub — returns 501 Not Implemented until that phase completes.
+import { getIronSession } from 'iron-session';
+import { sessionOptions, SessionData } from '@/lib/auth/session';
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 1 }, { status: 501 });
-}
-export async function POST(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 1 }, { status: 501 });
-}
-export async function PATCH(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 1 }, { status: 501 });
+  const response = NextResponse.json({});
+  const session = await getIronSession<SessionData>(request, response, sessionOptions);
+  
+  if (!session.userId) {
+    return NextResponse.json({ authenticated: false }, { status: 401 });
+  }
+
+  return NextResponse.json({
+    authenticated: true,
+    user: {
+      id: session.userId,
+      employeeId: session.employeeId,
+      name: session.name,
+      role: session.role
+    }
+  });
 }

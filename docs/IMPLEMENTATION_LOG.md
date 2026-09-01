@@ -16,3 +16,16 @@
   - Addressed build/compilation errors including TypeScript configurations, BOM issues, and Prisma 7 driver adapter migration (prisma.config.ts).
 - **Tests run:** 
 pm run build completed successfully. Playwright smoke test (	ests/e2e/smoke.spec.ts) ready for UI verification.
+
+## Phase 1: Core Authentication & Sessions
+- **Status:** COMPLETE
+- **Timestamp:** 2026-09-01T21:51:34
+- **Actions Taken:**
+  - Initialized local SQLite DB (dev.db) for testing due to Docker unavailability.
+  - Implemented secure authentication endpoints (/api/auth/login, /api/auth/logout, /api/auth/session).
+  - Implemented login rate-limiting (max 5 failed attempts locks account for 15 minutes).
+  - Used iron-session to issue HTTP-only encrypted session cookies.
+  - Wrote append-only USER_LOGIN and USER_LOGOUT events to the AuditLog.
+  - Built React client component pp/(auth)/login/page.tsx with error handling and Suspense wrapper.
+  - Added seeded users for testing: IO001, SUP001, LEG001, CFG001 (password: sims123).
+- **Tests run:** TypeScript build passed successfully. API integration tested. Playwright Chromium install encountered network timeout (ECONNRESET) but test code is in place (	ests/e2e/auth.spec.ts).

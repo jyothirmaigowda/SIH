@@ -1,14 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getIronSession } from 'iron-session';
+import { sessionOptions, SessionData } from '@/lib/auth/session';
+import { writeAuditEvent } from '@/lib/audit';
 
-// Phase 1 will implement this endpoint.
-// Stub — returns 501 Not Implemented until that phase completes.
-
-export async function GET(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 1 }, { status: 501 });
-}
 export async function POST(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 1 }, { status: 501 });
-}
-export async function PATCH(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 1 }, { status: 501 });
+  try {
+    const response = NextResponse.json({ success: true, redirect: '/login' });
+    const session = await getIronSession<SessionData>(request, response, sessionOptions);
+    
+    if (session.userId) {
+      await writeAuditEvent({
+        actorId: session.userId,
+        actorRole: session.role,
+        action: 'USER_LOGOUT',
+        result: 'SUCCESS',
+        metadata: { employeeId: session.employeeId }
+      });
+    }
+
+    session.destroy();
+    return response;
+  } catch (error) {
+    console.error('Logout error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

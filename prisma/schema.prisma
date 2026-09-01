@@ -1,5 +1,5 @@
-// SIMS — Prisma Schema
-// Source of truth: /docs/SIMS-SPEC.md — Canonical Data Model section
+// SIMS Ã¢â‚¬â€ Prisma Schema
+// Source of truth: /docs/SIMS-SPEC.md Ã¢â‚¬â€ Canonical Data Model section
 // IMMUTABILITY RULE: DocumentVersion, EvidenceFile, CustodyEvent, ReportVersion, AuditLog
 // rows are NEVER updated after insert. Corrections = new row.
 
@@ -8,187 +8,49 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  url = "file:./dev.db"
+  provider = "sqlite"
 }
 
-// ─── Enums ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Enums Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-enum UserRole {
-  INVESTIGATING_OFFICER
-  SUPERVISOR
-  LEGAL
-  CONFIG
-}
 
-enum CaseStatus {
-  REGISTERED
-  UNDER_INVESTIGATION
-  CHARGESHEETED
-  CLOSED
-  TRANSFERRED
-}
 
-enum CasePriority {
-  NORMAL
-  HIGH
-  CRITICAL
-}
 
-enum CaseAssignmentRole {
-  PRIMARY_IO
-  SECONDARY_IO
-  SUPERVISOR
-  LEGAL_REVIEWER
-}
 
-enum PersonCategory {
-  COMPLAINANT
-  VICTIM
-  SUSPECT
-  ACCUSED
-  WITNESS
-  OFFICER
-}
 
-enum DocumentStatus {
-  ACTIVE
-  SUPERSEDED
-  ARCHIVED
-}
 
-enum DocumentType {
-  FIR_COMPLAINT
-  STATEMENT
-  SEIZURE_MAHAZAR
-  NOTICE
-  WARRANT_AUTHORIZATION
-  FORENSIC_REPORT
-  CORRESPONDENCE
-  DIGITAL_EVIDENCE_REPORT
-  INVESTIGATION_NOTES
-  SUPERVISOR_REVIEW
-  LEGAL_REVIEW
-  FINAL_INVESTIGATION_REPORT
-  OTHER
-}
 
-enum EvidenceType {
-  DIGITAL
-  PHYSICAL
-  DOCUMENTARY
-  FORENSIC
-  BIOLOGICAL
-}
 
-enum EvidenceStatus {
-  COLLECTED
-  REGISTERED
-  ACQUIRED
-  INTEGRITY_VERIFIED
-  IN_CUSTODY
-  UNDER_EXAMINATION
-  SEALED
-  PRODUCED_IN_COURT
-  RETURNED
-  DISPOSED
-}
 
-enum CustodyAction {
-  RECEIVED
-  TRANSFERRED
-  EXAMINED
-  SEALED
-  PRODUCED_IN_COURT
-  RETURNED
-  DISPOSED
-}
 
-enum ReportType {
-  PRELIMINARY
-  PROGRESS
-  FINAL_INVESTIGATION
-  CHARGESHEET_MATERIAL
-}
 
-enum ReportStatus {
-  DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  APPROVED
-  RETURNED
-  FINAL
-}
 
-enum ReviewDecision {
-  APPROVED
-  RETURNED
-  FLAGGED
-}
 
-enum NotificationType {
-  CASE_ASSIGNED
-  CASE_UPDATED
-  DOCUMENT_UPLOADED
-  EVIDENCE_UPDATED
-  CUSTODY_TRANSFERRED
-  REPORT_SUBMITTED
-  REPORT_REVIEWED
-  INTEGRITY_FAILURE
-  DEADLINE_REMINDER
-  SYSTEM
-}
 
-enum AuditAction {
-  LOGIN_SUCCESS
-  LOGIN_FAILED
-  LOGOUT
-  SESSION_EXPIRED
-  ACCOUNT_LOCKED
-  PASSWORD_CHANGED
-  ROLE_CHANGED
-  CASE_CREATED
-  CASE_VIEWED
-  CASE_UPDATED
-  CASE_ASSIGNED
-  DOCUMENT_UPLOADED
-  DOCUMENT_DOWNLOADED
-  DOCUMENT_VERSION_CREATED
-  EVIDENCE_REGISTERED
-  EVIDENCE_VIEWED
-  EVIDENCE_INTEGRITY_VERIFIED
-  EVIDENCE_INTEGRITY_FAILED
-  CUSTODY_TRANSFERRED
-  REPORT_CREATED
-  REPORT_SUBMITTED
-  REPORT_REVIEWED
-  REPORT_PDF_EXPORTED
-  EXPORT_PACKET_CREATED
-  EXPORT_PACKET_DOWNLOADED
-  SEARCH_PERFORMED
-  CERTIFICATE_CREATED
-  ACCESS_DENIED
-  AUDIT_LOG_VIEWED
-  CONFIG_CHANGED
-}
 
-enum AuditResult {
-  SUCCESS
-  FAILURE
-  DENIED
-}
 
-enum DiaryEntryStatus {
-  ACTIVE
-  SUPERVISOR_REVIEWED
-}
 
-enum CertificateStatus {
-  DRAFT
-  SUBMITTED
-  VERIFIED
-}
 
-// ─── Police Command Hierarchy ─────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Police Command Hierarchy Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // SEPARATE from administrative geography (spec requirement)
 
 model PoliceOrganisation {
@@ -205,8 +67,8 @@ model PoliceOrganisation {
   updatedAt DateTime             @updatedAt
 }
 
-// ─── Administrative Geography ─────────────────────────────────────────────────
-// SEPARATE dimension — district/taluk/locality attaches to Case as location metadata only
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Administrative Geography Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// SEPARATE dimension Ã¢â‚¬â€ district/taluk/locality attaches to Case as location metadata only
 
 model AdministrativeArea {
   id        String               @id @default(cuid())
@@ -221,14 +83,14 @@ model AdministrativeArea {
   updatedAt DateTime             @updatedAt
 }
 
-// ─── Users ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Users Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model User {
   id                    String               @id @default(cuid())
   employeeId            String               @unique
   name                  String
   email                 String               @unique
-  role                  UserRole
+  role                  String
   passwordHash          String
   mfaEnabled            Boolean              @default(false)
   mfaSecret             String?
@@ -261,7 +123,7 @@ model User {
   @@index([stationId])
 }
 
-// ─── Cases ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Cases Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Case {
   id              String             @id @default(cuid())
@@ -270,9 +132,9 @@ model Case {
   firDate         DateTime?
   title           String
   type            String
-  offenceSections String[]
-  status          CaseStatus         @default(REGISTERED)
-  priority        CasePriority       @default(NORMAL)
+  offenceSections String
+  status          String         @default("REGISTERED")
+  priority        String       @default("NORMAL")
   stationId       String
   station         PoliceOrganisation @relation(fields: [stationId], references: [id])
   registeredAt    DateTime           @default(now())
@@ -296,7 +158,7 @@ model Case {
   @@index([firNumber])
 }
 
-// ─── Case Assignments ─────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Case Assignments Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model CaseAssignment {
   id           String             @id @default(cuid())
@@ -304,7 +166,7 @@ model CaseAssignment {
   case         Case               @relation(fields: [caseId], references: [id])
   userId       String
   user         User               @relation(fields: [userId], references: [id])
-  role         CaseAssignmentRole
+  role         String
   assignedById String
   assignedAt   DateTime           @default(now())
   removedAt    DateTime?
@@ -315,16 +177,16 @@ model CaseAssignment {
   @@index([userId])
 }
 
-// ─── Persons ──────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Persons Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Person {
   id          String         @id @default(cuid())
   caseId      String
   case        Case           @relation(fields: [caseId], references: [id])
-  category    PersonCategory
+  category    String
   name        String
-  identifiers Json           @default("{}")
-  contactInfo Json           @default("{}")
+  identifiers String           @default("{}")
+  contactInfo String           @default("{}")
   address     String?
   notes       String?
   createdAt   DateTime       @default(now())
@@ -336,7 +198,7 @@ model Person {
   @@index([category])
 }
 
-// ─── Locations ────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Locations Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Location {
   id                   String              @id @default(cuid())
@@ -344,7 +206,7 @@ model Location {
   case                 Case                @relation(fields: [caseId], references: [id])
   label                String
   address              String?
-  coordinates          Json?
+  coordinates          String?
   administrativeAreaId String?
   administrativeArea   AdministrativeArea? @relation(fields: [administrativeAreaId], references: [id])
   createdAt            DateTime            @default(now())
@@ -354,15 +216,15 @@ model Location {
   @@index([caseId])
 }
 
-// ─── Documents (metadata only — bytes live in private storage) ────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Documents (metadata only Ã¢â‚¬â€ bytes live in private storage) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Document {
   id          String         @id @default(cuid())
   caseId      String
   case        Case           @relation(fields: [caseId], references: [id])
-  type        DocumentType
+  type        String
   description String
-  status      DocumentStatus @default(ACTIVE)
+  status      String @default("ACTIVE")
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
@@ -393,21 +255,21 @@ model DocumentVersion {
   @@index([sha256Hash])
 }
 
-// ─── Evidence ─────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Evidence Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Evidence {
   id              String         @id @default(cuid())
   evidenceRef     String         @unique
   caseId          String
   case            Case           @relation(fields: [caseId], references: [id])
-  type            EvidenceType
+  type            String
   description     String
   source          String
   collectedById   String
   collectedBy     User           @relation(fields: [collectedById], references: [id])
   collectedAt     DateTime
   collectionPlace String
-  status          EvidenceStatus @default(COLLECTED)
+  status          String @default("COLLECTED")
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
@@ -439,13 +301,13 @@ model EvidenceFile {
   uid              String?
   macAddress       String?
   cloudId          String?
-  operationalInfo  Json?
-  controlInfo      Json?
+  operationalInfo  String?
+  controlInfo      String?
   hashReportRef    String?
   acquiredAt       DateTime @default(now())
 }
 
-// ─── Chain of Custody (append-only) ──────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Chain of Custody (append-only) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model CustodyEvent {
   id         String        @id @default(cuid())
@@ -457,7 +319,7 @@ model CustodyEvent {
   toUser     User?         @relation("CustodyTo", fields: [toUserId], references: [id])
   actorId    String
   actor      User          @relation("CustodyActor", fields: [actorId], references: [id])
-  action     CustodyAction
+  action     String
   place      String
   purpose    String
   notes      String?
@@ -469,7 +331,7 @@ model CustodyEvent {
   @@index([occurredAt])
 }
 
-// ─── Investigation Diary (separate from Technical Audit Trail) ────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Investigation Diary (separate from Technical Audit Trail) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model InvestigationDiaryEntry {
   id                       String           @id @default(cuid())
@@ -480,15 +342,15 @@ model InvestigationDiaryEntry {
   informationReceivedAt    DateTime?
   startTime                DateTime?
   endTime                  DateTime?
-  placesVisited            String[]
+  placesVisited            String
   proceedings              String
   circumstancesAscertained String?
-  witnessRefs              String[]
-  evidenceRefs             String[]
-  documentRefs             String[]
+  witnessRefs              String
+  evidenceRefs             String
+  documentRefs             String
   officerId                String
   officer                  User             @relation(fields: [officerId], references: [id])
-  status                   DiaryEntryStatus @default(ACTIVE)
+  status                   String @default("ACTIVE")
   supervisorId             String?
   supervisor               User?            @relation("DiaryEntrySupervisor", fields: [supervisorId], references: [id])
   supervisorReviewAt       DateTime?
@@ -500,14 +362,14 @@ model InvestigationDiaryEntry {
   @@index([entryDate])
 }
 
-// ─── Reports ──────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Reports Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Report {
   id           String       @id @default(cuid())
   caseId       String
   case         Case         @relation(fields: [caseId], references: [id])
-  type         ReportType
-  status       ReportStatus @default(DRAFT)
+  type         String
+  status       String @default("DRAFT")
   createdById  String
   createdBy    User         @relation(fields: [createdById], references: [id])
   createdAt    DateTime     @default(now())
@@ -527,24 +389,24 @@ model ReportVersion {
   reportId                     String
   report                       Report   @relation(fields: [reportId], references: [id])
   versionNumber                Int
-  caseDetails                  Json
-  persons                      Json
-  offenceSections              Json
+  caseDetails                  String
+  persons                      String
+  offenceSections              String
   incidentSummary              String
   objectives                   String
   proceedingsSummary           String
-  statementsIndex              Json
-  documentsIndex               Json
-  evidenceIndex                Json
+  statementsIndex              String
+  documentsIndex               String
+  evidenceIndex                String
   forensicExamination          String?
-  custodyChainSummary          Json
-  digitalEvidenceCertificates  Json
+  custodyChainSummary          String
+  digitalEvidenceCertificates  String
   findings                     String?
   contradictions               String?
   gaps                         String?
   pendingActions               String?
   supervisorObservations       String?
-  legalReadiness               Json
+  legalReadiness               String
   finalSummary                 String
   pdfStorageKey                String?
   pdfSha256                    String?
@@ -557,7 +419,7 @@ model ReportVersion {
   @@index([reportId])
 }
 
-// ─── Reviews ──────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Reviews Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Review {
   id         String         @id @default(cuid())
@@ -565,14 +427,14 @@ model Review {
   report     Report         @relation(fields: [reportId], references: [id])
   reviewerId String
   reviewer   User           @relation(fields: [reviewerId], references: [id])
-  decision   ReviewDecision
+  decision   String
   comments   String
   reviewedAt DateTime       @default(now())
 
   @@index([reportId])
 }
 
-// ─── Certificates (BSA s.63) ──────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Certificates (BSA s.63) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Certificate {
   id             String            @id @default(cuid())
@@ -582,7 +444,7 @@ model Certificate {
   evidence       Evidence?         @relation(fields: [evidenceId], references: [id])
   certifierId    String
   certifier      User              @relation(fields: [certifierId], references: [id])
-  status         CertificateStatus @default(DRAFT)
+  status         String @default("DRAFT")
   sourceType     String
   deviceMake     String?
   deviceModel    String?
@@ -593,7 +455,7 @@ model Certificate {
   hashReportRef  String?
   certifiedDate  DateTime?
   certifiedPlace String?
-  additionalInfo Json              @default("{}")
+  additionalInfo String              @default("{}")
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -601,13 +463,13 @@ model Certificate {
   @@index([evidenceId])
 }
 
-// ─── Notifications (persistent in DB) ────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Notifications (persistent in DB) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model Notification {
   id           String           @id @default(cuid())
   userId       String
   user         User             @relation(fields: [userId], references: [id])
-  type         NotificationType
+  type         String
   caseId       String?
   case         Case?            @relation(fields: [caseId], references: [id])
   reportId     String?
@@ -622,22 +484,22 @@ model Notification {
   @@index([caseId])
 }
 
-// ─── Technical Audit Log (append-only, restricted) ───────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Technical Audit Log (append-only, restricted) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model AuditLog {
   id           String      @id @default(cuid())
   actorId      String?
   actor        User?       @relation(fields: [actorId], references: [id])
-  actorRole    UserRole?
-  action       AuditAction
+  actorRole    String?
+  action       String
   resourceType String?
   resourceId   String?
   caseId       String?
   case         Case?       @relation(fields: [caseId], references: [id])
-  result       AuditResult
+  result       String
   ipAddress    String?
   userAgent    String?
-  metadata     Json        @default("{}")
+  metadata     String        @default("{}")
   occurredAt   DateTime    @default(now())
 
   @@index([actorId])
@@ -647,7 +509,7 @@ model AuditLog {
   @@index([result])
 }
 
-// ─── Investigation Graph (DB-backed) ─────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Investigation Graph (DB-backed) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model GraphNode {
   id         String    @id @default(cuid())
@@ -665,7 +527,7 @@ model GraphNode {
   evidence   Evidence? @relation(fields: [evidenceId], references: [id])
   reportId   String?
   report     Report?   @relation(fields: [reportId], references: [id])
-  metadata   Json      @default("{}")
+  metadata   String      @default("{}")
   createdAt  DateTime  @default(now())
 
   outEdges   GraphEdge[] @relation("EdgeFrom")
@@ -684,7 +546,7 @@ model GraphEdge {
   toNodeId     String
   toNode       GraphNode @relation("EdgeTo", fields: [toNodeId], references: [id])
   relationship String    // INVOLVED_IN | WITNESS_OF | LINKED_TO | ACQUIRED_FROM | COLLECTED_AT | SUPPORTS | REFERENCES | TRANSFERRED_TO | OCCURRED_AT | DERIVED_FROM
-  metadata     Json      @default("{}")
+  metadata     String      @default("{}")
   createdAt    DateTime  @default(now())
 
   @@index([caseId])

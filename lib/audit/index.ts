@@ -1,5 +1,8 @@
-﻿import { prisma } from '@/lib/db';
-import { AuditAction, AuditResult, UserRole } from '@prisma/client';
+import { prisma } from '@/lib/db';
+
+export type UserRole = string;
+export type AuditAction = string;
+export type AuditResult = string;
 
 export interface AuditEventParams {
   actorId?: string;
@@ -14,10 +17,6 @@ export interface AuditEventParams {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Write an immutable audit event. APPEND-ONLY — never updates or deletes.
- * Sensitive data (tokens, passwords) must NEVER appear in metadata.
- */
 export async function writeAuditEvent(params: AuditEventParams): Promise<void> {
   await prisma.auditLog.create({
     data: {
@@ -30,7 +29,7 @@ export async function writeAuditEvent(params: AuditEventParams): Promise<void> {
       result: params.result,
       ipAddress: params.ipAddress,
       userAgent: params.userAgent,
-      metadata: (params.metadata ?? {}) as object,
+      metadata: params.metadata ? JSON.stringify(params.metadata) : '{}',
     },
   });
 }

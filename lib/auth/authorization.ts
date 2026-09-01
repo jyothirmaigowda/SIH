@@ -1,11 +1,14 @@
-﻿import { prisma } from '@/lib/db';
-import { UserRole } from '@prisma/client';
+import { prisma } from '@/lib/db';
 
-/**
- * Check if a user is actively assigned to a case.
- * CONFIG role bypasses assignment check.
- * Role alone is NEVER sufficient — case assignment is always also checked.
- */
+export const UserRole = {
+  IO: 'IO',
+  SUPERVISOR: 'SUPERVISOR',
+  LEGAL: 'LEGAL',
+  CONFIG: 'CONFIG'
+} as const;
+
+export type UserRole = keyof typeof UserRole | string;
+
 export async function isUserAssignedToCase(userId: string, caseId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId, active: true },
