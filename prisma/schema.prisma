@@ -1,0 +1,693 @@
+// SIMS — Prisma Schema
+// Source of truth: /docs/SIMS-SPEC.md — Canonical Data Model section
+// IMMUTABILITY RULE: DocumentVersion, EvidenceFile, CustodyEvent, ReportVersion, AuditLog
+// rows are NEVER updated after insert. Corrections = new row.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  INVESTIGATING_OFFICER
+  SUPERVISOR
+  LEGAL
+  CONFIG
+}
+
+enum CaseStatus {
+  REGISTERED
+  UNDER_INVESTIGATION
+  CHARGESHEETED
+  CLOSED
+  TRANSFERRED
+}
+
+enum CasePriority {
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum CaseAssignmentRole {
+  PRIMARY_IO
+  SECONDARY_IO
+  SUPERVISOR
+  LEGAL_REVIEWER
+}
+
+enum PersonCategory {
+  COMPLAINANT
+  VICTIM
+  SUSPECT
+  ACCUSED
+  WITNESS
+  OFFICER
+}
+
+enum DocumentStatus {
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum DocumentType {
+  FIR_COMPLAINT
+  STATEMENT
+  SEIZURE_MAHAZAR
+  NOTICE
+  WARRANT_AUTHORIZATION
+  FORENSIC_REPORT
+  CORRESPONDENCE
+  DIGITAL_EVIDENCE_REPORT
+  INVESTIGATION_NOTES
+  SUPERVISOR_REVIEW
+  LEGAL_REVIEW
+  FINAL_INVESTIGATION_REPORT
+  OTHER
+}
+
+enum EvidenceType {
+  DIGITAL
+  PHYSICAL
+  DOCUMENTARY
+  FORENSIC
+  BIOLOGICAL
+}
+
+enum EvidenceStatus {
+  COLLECTED
+  REGISTERED
+  ACQUIRED
+  INTEGRITY_VERIFIED
+  IN_CUSTODY
+  UNDER_EXAMINATION
+  SEALED
+  PRODUCED_IN_COURT
+  RETURNED
+  DISPOSED
+}
+
+enum CustodyAction {
+  RECEIVED
+  TRANSFERRED
+  EXAMINED
+  SEALED
+  PRODUCED_IN_COURT
+  RETURNED
+  DISPOSED
+}
+
+enum ReportType {
+  PRELIMINARY
+  PROGRESS
+  FINAL_INVESTIGATION
+  CHARGESHEET_MATERIAL
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  RETURNED
+  FINAL
+}
+
+enum ReviewDecision {
+  APPROVED
+  RETURNED
+  FLAGGED
+}
+
+enum NotificationType {
+  CASE_ASSIGNED
+  CASE_UPDATED
+  DOCUMENT_UPLOADED
+  EVIDENCE_UPDATED
+  CUSTODY_TRANSFERRED
+  REPORT_SUBMITTED
+  REPORT_REVIEWED
+  INTEGRITY_FAILURE
+  DEADLINE_REMINDER
+  SYSTEM
+}
+
+enum AuditAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  SESSION_EXPIRED
+  ACCOUNT_LOCKED
+  PASSWORD_CHANGED
+  ROLE_CHANGED
+  CASE_CREATED
+  CASE_VIEWED
+  CASE_UPDATED
+  CASE_ASSIGNED
+  DOCUMENT_UPLOADED
+  DOCUMENT_DOWNLOADED
+  DOCUMENT_VERSION_CREATED
+  EVIDENCE_REGISTERED
+  EVIDENCE_VIEWED
+  EVIDENCE_INTEGRITY_VERIFIED
+  EVIDENCE_INTEGRITY_FAILED
+  CUSTODY_TRANSFERRED
+  REPORT_CREATED
+  REPORT_SUBMITTED
+  REPORT_REVIEWED
+  REPORT_PDF_EXPORTED
+  EXPORT_PACKET_CREATED
+  EXPORT_PACKET_DOWNLOADED
+  SEARCH_PERFORMED
+  CERTIFICATE_CREATED
+  ACCESS_DENIED
+  AUDIT_LOG_VIEWED
+  CONFIG_CHANGED
+}
+
+enum AuditResult {
+  SUCCESS
+  FAILURE
+  DENIED
+}
+
+enum DiaryEntryStatus {
+  ACTIVE
+  SUPERVISOR_REVIEWED
+}
+
+enum CertificateStatus {
+  DRAFT
+  SUBMITTED
+  VERIFIED
+}
+
+// ─── Police Command Hierarchy ─────────────────────────────────────────────────
+// SEPARATE from administrative geography (spec requirement)
+
+model PoliceOrganisation {
+  id        String               @id @default(cuid())
+  name      String
+  level     String               // STATE | CITY_POLICE | DIVISION | SUB_DIVISION | STATION
+  parentId  String?
+  parent    PoliceOrganisation?  @relation("OrgHierarchy", fields: [parentId], references: [id])
+  children  PoliceOrganisation[] @relation("OrgHierarchy")
+  isDemo    Boolean              @default(true)
+  users     User[]
+  cases     Case[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+// ─── Administrative Geography ─────────────────────────────────────────────────
+// SEPARATE dimension — district/taluk/locality attaches to Case as location metadata only
+
+model AdministrativeArea {
+  id        String               @id @default(cuid())
+  name      String
+  level     String               // DISTRICT | TALUK | HOBLI | WARD | LOCALITY
+  parentId  String?
+  parent    AdministrativeArea?  @relation("AdminHierarchy", fields: [parentId], references: [id])
+  children  AdministrativeArea[] @relation("AdminHierarchy")
+  isDemo    Boolean              @default(true)
+  locations Location[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+// ─── Users ────────────────────────────────────────────────────────────────────
+
+model User {
+  id                    String               @id @default(cuid())
+  employeeId            String               @unique
+  name                  String
+  email                 String               @unique
+  role                  UserRole
+  passwordHash          String
+  mfaEnabled            Boolean              @default(false)
+  mfaSecret             String?
+  active                Boolean              @default(true)
+  failedLoginAttempts   Int                  @default(0)
+  lockedUntil           DateTime?
+  lastLoginAt           DateTime?
+  stationId             String?
+  station               PoliceOrganisation?  @relation(fields: [stationId], references: [id])
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  caseAssignments       CaseAssignment[]
+  uploadedDocuments     DocumentVersion[]
+  collectedEvidence     Evidence[]
+  custodyFrom           CustodyEvent[]       @relation("CustodyFrom")
+  custodyTo             CustodyEvent[]       @relation("CustodyTo")
+  custodyActor          CustodyEvent[]       @relation("CustodyActor")
+  diaryEntries          InvestigationDiaryEntry[]
+  supervisedEntries     InvestigationDiaryEntry[] @relation("DiaryEntrySupervisor")
+  reportsCreated        Report[]
+  reportVersions        ReportVersion[]
+  reviews               Review[]
+  certificates          Certificate[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
+
+  @@index([role])
+  @@index([active])
+  @@index([stationId])
+}
+
+// ─── Cases ────────────────────────────────────────────────────────────────────
+
+model Case {
+  id              String             @id @default(cuid())
+  caseNumber      String             @unique
+  firNumber       String?
+  firDate         DateTime?
+  title           String
+  type            String
+  offenceSections String[]
+  status          CaseStatus         @default(REGISTERED)
+  priority        CasePriority       @default(NORMAL)
+  stationId       String
+  station         PoliceOrganisation @relation(fields: [stationId], references: [id])
+  registeredAt    DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  assignments     CaseAssignment[]
+  persons         Person[]
+  locations       Location[]
+  documents       Document[]
+  evidence        Evidence[]
+  diaryEntries    InvestigationDiaryEntry[]
+  reports         Report[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  certificates    Certificate[]
+  graphNodes      GraphNode[]
+  graphEdges      GraphEdge[]
+
+  @@index([status])
+  @@index([stationId])
+  @@index([firNumber])
+}
+
+// ─── Case Assignments ─────────────────────────────────────────────────────────
+
+model CaseAssignment {
+  id           String             @id @default(cuid())
+  caseId       String
+  case         Case               @relation(fields: [caseId], references: [id])
+  userId       String
+  user         User               @relation(fields: [userId], references: [id])
+  role         CaseAssignmentRole
+  assignedById String
+  assignedAt   DateTime           @default(now())
+  removedAt    DateTime?
+  active       Boolean            @default(true)
+
+  @@unique([caseId, userId, role])
+  @@index([caseId])
+  @@index([userId])
+}
+
+// ─── Persons ──────────────────────────────────────────────────────────────────
+
+model Person {
+  id          String         @id @default(cuid())
+  caseId      String
+  case        Case           @relation(fields: [caseId], references: [id])
+  category    PersonCategory
+  name        String
+  identifiers Json           @default("{}")
+  contactInfo Json           @default("{}")
+  address     String?
+  notes       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  graphNodes  GraphNode[]
+
+  @@index([caseId])
+  @@index([category])
+}
+
+// ─── Locations ────────────────────────────────────────────────────────────────
+
+model Location {
+  id                   String              @id @default(cuid())
+  caseId               String
+  case                 Case                @relation(fields: [caseId], references: [id])
+  label                String
+  address              String?
+  coordinates          Json?
+  administrativeAreaId String?
+  administrativeArea   AdministrativeArea? @relation(fields: [administrativeAreaId], references: [id])
+  createdAt            DateTime            @default(now())
+
+  graphNodes           GraphNode[]
+
+  @@index([caseId])
+}
+
+// ─── Documents (metadata only — bytes live in private storage) ────────────────
+
+model Document {
+  id          String         @id @default(cuid())
+  caseId      String
+  case        Case           @relation(fields: [caseId], references: [id])
+  type        DocumentType
+  description String
+  status      DocumentStatus @default(ACTIVE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  versions    DocumentVersion[]
+  graphNodes  GraphNode[]
+
+  @@index([caseId])
+  @@index([type])
+  @@index([status])
+}
+
+model DocumentVersion {
+  id               String   @id @default(cuid())
+  documentId       String
+  document         Document @relation(fields: [documentId], references: [id])
+  versionNumber    Int
+  originalFilename String
+  storageKey       String   @unique
+  mimeType         String
+  sizeBytes        BigInt
+  sha256Hash       String
+  uploadedById     String
+  uploadedBy       User     @relation(fields: [uploadedById], references: [id])
+  uploadedAt       DateTime @default(now())
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@index([sha256Hash])
+}
+
+// ─── Evidence ─────────────────────────────────────────────────────────────────
+
+model Evidence {
+  id              String         @id @default(cuid())
+  evidenceRef     String         @unique
+  caseId          String
+  case            Case           @relation(fields: [caseId], references: [id])
+  type            EvidenceType
+  description     String
+  source          String
+  collectedById   String
+  collectedBy     User           @relation(fields: [collectedById], references: [id])
+  collectedAt     DateTime
+  collectionPlace String
+  status          EvidenceStatus @default(COLLECTED)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  files           EvidenceFile[]
+  custodyEvents   CustodyEvent[]
+  certificates    Certificate[]
+  graphNodes      GraphNode[]
+
+  @@index([caseId])
+  @@index([status])
+}
+
+model EvidenceFile {
+  id               String   @id @default(cuid())
+  evidenceId       String
+  evidence         Evidence @relation(fields: [evidenceId], references: [id])
+  storageKey       String   @unique
+  originalFilename String
+  mimeType         String
+  sizeBytes        BigInt
+  sha256Hash       String
+  hashAlgorithm    String   @default("SHA-256")
+  sourceType       String?
+  deviceMake       String?
+  deviceModel      String?
+  serialNumber     String?
+  imei             String?
+  uin              String?
+  uid              String?
+  macAddress       String?
+  cloudId          String?
+  operationalInfo  Json?
+  controlInfo      Json?
+  hashReportRef    String?
+  acquiredAt       DateTime @default(now())
+}
+
+// ─── Chain of Custody (append-only) ──────────────────────────────────────────
+
+model CustodyEvent {
+  id         String        @id @default(cuid())
+  evidenceId String
+  evidence   Evidence      @relation(fields: [evidenceId], references: [id])
+  fromUserId String?
+  fromUser   User?         @relation("CustodyFrom", fields: [fromUserId], references: [id])
+  toUserId   String?
+  toUser     User?         @relation("CustodyTo", fields: [toUserId], references: [id])
+  actorId    String
+  actor      User          @relation("CustodyActor", fields: [actorId], references: [id])
+  action     CustodyAction
+  place      String
+  purpose    String
+  notes      String?
+  eventHash  String
+  occurredAt DateTime
+  createdAt  DateTime      @default(now())
+
+  @@index([evidenceId])
+  @@index([occurredAt])
+}
+
+// ─── Investigation Diary (separate from Technical Audit Trail) ────────────────
+
+model InvestigationDiaryEntry {
+  id                       String           @id @default(cuid())
+  caseId                   String
+  case                     Case             @relation(fields: [caseId], references: [id])
+  pageNumber               Int
+  entryDate                DateTime
+  informationReceivedAt    DateTime?
+  startTime                DateTime?
+  endTime                  DateTime?
+  placesVisited            String[]
+  proceedings              String
+  circumstancesAscertained String?
+  witnessRefs              String[]
+  evidenceRefs             String[]
+  documentRefs             String[]
+  officerId                String
+  officer                  User             @relation(fields: [officerId], references: [id])
+  status                   DiaryEntryStatus @default(ACTIVE)
+  supervisorId             String?
+  supervisor               User?            @relation("DiaryEntrySupervisor", fields: [supervisorId], references: [id])
+  supervisorReviewAt       DateTime?
+  supervisorNotes          String?
+  createdAt                DateTime         @default(now())
+
+  @@unique([caseId, pageNumber])
+  @@index([caseId])
+  @@index([entryDate])
+}
+
+// ─── Reports ──────────────────────────────────────────────────────────────────
+
+model Report {
+  id           String       @id @default(cuid())
+  caseId       String
+  case         Case         @relation(fields: [caseId], references: [id])
+  type         ReportType
+  status       ReportStatus @default(DRAFT)
+  createdById  String
+  createdBy    User         @relation(fields: [createdById], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  versions     ReportVersion[]
+  reviews      Review[]
+  notifications Notification[]
+  graphNodes   GraphNode[]
+
+  @@index([caseId])
+  @@index([status])
+}
+
+model ReportVersion {
+  id                           String   @id @default(cuid())
+  reportId                     String
+  report                       Report   @relation(fields: [reportId], references: [id])
+  versionNumber                Int
+  caseDetails                  Json
+  persons                      Json
+  offenceSections              Json
+  incidentSummary              String
+  objectives                   String
+  proceedingsSummary           String
+  statementsIndex              Json
+  documentsIndex               Json
+  evidenceIndex                Json
+  forensicExamination          String?
+  custodyChainSummary          Json
+  digitalEvidenceCertificates  Json
+  findings                     String?
+  contradictions               String?
+  gaps                         String?
+  pendingActions               String?
+  supervisorObservations       String?
+  legalReadiness               Json
+  finalSummary                 String
+  pdfStorageKey                String?
+  pdfSha256                    String?
+  sha256Hash                   String
+  authorId                     String
+  author                       User     @relation(fields: [authorId], references: [id])
+  createdAt                    DateTime @default(now())
+
+  @@unique([reportId, versionNumber])
+  @@index([reportId])
+}
+
+// ─── Reviews ──────────────────────────────────────────────────────────────────
+
+model Review {
+  id         String         @id @default(cuid())
+  reportId   String
+  report     Report         @relation(fields: [reportId], references: [id])
+  reviewerId String
+  reviewer   User           @relation(fields: [reviewerId], references: [id])
+  decision   ReviewDecision
+  comments   String
+  reviewedAt DateTime       @default(now())
+
+  @@index([reportId])
+}
+
+// ─── Certificates (BSA s.63) ──────────────────────────────────────────────────
+
+model Certificate {
+  id             String            @id @default(cuid())
+  caseId         String
+  case           Case              @relation(fields: [caseId], references: [id])
+  evidenceId     String?
+  evidence       Evidence?         @relation(fields: [evidenceId], references: [id])
+  certifierId    String
+  certifier      User              @relation(fields: [certifierId], references: [id])
+  status         CertificateStatus @default(DRAFT)
+  sourceType     String
+  deviceMake     String?
+  deviceModel    String?
+  serialNumber   String?
+  imei           String?
+  hashValue      String
+  hashAlgorithm  String            @default("SHA-256")
+  hashReportRef  String?
+  certifiedDate  DateTime?
+  certifiedPlace String?
+  additionalInfo Json              @default("{}")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([caseId])
+  @@index([evidenceId])
+}
+
+// ─── Notifications (persistent in DB) ────────────────────────────────────────
+
+model Notification {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  type         NotificationType
+  caseId       String?
+  case         Case?            @relation(fields: [caseId], references: [id])
+  reportId     String?
+  report       Report?          @relation(fields: [reportId], references: [id])
+  resourceType String?
+  resourceId   String?
+  message      String
+  readAt       DateTime?
+  createdAt    DateTime         @default(now())
+
+  @@index([userId, readAt])
+  @@index([caseId])
+}
+
+// ─── Technical Audit Log (append-only, restricted) ───────────────────────────
+
+model AuditLog {
+  id           String      @id @default(cuid())
+  actorId      String?
+  actor        User?       @relation(fields: [actorId], references: [id])
+  actorRole    UserRole?
+  action       AuditAction
+  resourceType String?
+  resourceId   String?
+  caseId       String?
+  case         Case?       @relation(fields: [caseId], references: [id])
+  result       AuditResult
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json        @default("{}")
+  occurredAt   DateTime    @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([caseId])
+  @@index([occurredAt])
+  @@index([result])
+}
+
+// ─── Investigation Graph (DB-backed) ─────────────────────────────────────────
+
+model GraphNode {
+  id         String    @id @default(cuid())
+  caseId     String
+  case       Case      @relation(fields: [caseId], references: [id])
+  nodeType   String    // CASE | FIR | PERSON | EVENT | LOCATION | DOCUMENT | EVIDENCE | DEVICE | REPORT | CUSTODY | LEGAL
+  label      String
+  personId   String?
+  person     Person?   @relation(fields: [personId], references: [id])
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+  documentId String?
+  document   Document? @relation(fields: [documentId], references: [id])
+  evidenceId String?
+  evidence   Evidence? @relation(fields: [evidenceId], references: [id])
+  reportId   String?
+  report     Report?   @relation(fields: [reportId], references: [id])
+  metadata   Json      @default("{}")
+  createdAt  DateTime  @default(now())
+
+  outEdges   GraphEdge[] @relation("EdgeFrom")
+  inEdges    GraphEdge[] @relation("EdgeTo")
+
+  @@index([caseId])
+  @@index([nodeType])
+}
+
+model GraphEdge {
+  id           String    @id @default(cuid())
+  caseId       String
+  case         Case      @relation(fields: [caseId], references: [id])
+  fromNodeId   String
+  fromNode     GraphNode @relation("EdgeFrom", fields: [fromNodeId], references: [id])
+  toNodeId     String
+  toNode       GraphNode @relation("EdgeTo", fields: [toNodeId], references: [id])
+  relationship String    // INVOLVED_IN | WITNESS_OF | LINKED_TO | ACQUIRED_FROM | COLLECTED_AT | SUPPORTS | REFERENCES | TRANSFERRED_TO | OCCURRED_AT | DERIVED_FROM
+  metadata     Json      @default("{}")
+  createdAt    DateTime  @default(now())
+
+  @@index([caseId])
+  @@index([fromNodeId])
+  @@index([toNodeId])
+}

@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SIMS — private storage (never commit actual documents/evidence)
+storage/
+
+# Environment secrets
+.env.local
+.env.*.local
+
+# Prisma generated client
+node_modules/.prisma/
+
+# Playwright test results
+playwright-report/
+test-results/
