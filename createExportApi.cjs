@@ -1,4 +1,14 @@
+const fs = require('fs');
+const path = require('path');
 
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+const exportDir = 'app/api/cases/[caseId]/export';
+ensureDir(exportDir);
+
+fs.writeFileSync(path.join(exportDir, 'route.ts'), `
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { checkCaseAccess } from '@/lib/auth/authorization';
@@ -25,7 +35,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const auditLogs = await prisma.auditLog.findMany({
       where: { caseId },
-      orderBy: { occurredAt: 'desc' },
+      orderBy: { timestamp: 'desc' },
       take: 10
     });
 
@@ -49,26 +59,26 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       y -= (size + 8);
     };
 
-    drawText(`OFFICIAL CASE DIARY`, 20, true);
+    drawText(\`OFFICIAL CASE DIARY\`, 20, true);
     y -= 10;
-    drawText(`Case Number: ${caseData.caseNumber}`, 14);
-    drawText(`Title: ${caseData.title}`);
-    drawText(`Status: ${caseData.status}`);
-    drawText(`Generated At: ${new Date().toISOString()}`);
+    drawText(\`Case Number: \${caseData.caseNumber}\`, 14);
+    drawText(\`Title: \${caseData.title}\`);
+    drawText(\`Status: \${caseData.status}\`);
+    drawText(\`Generated At: \${new Date().toISOString()}\`);
     y -= 20;
 
-    drawText(`EVIDENCE REGISTRY (${caseData.evidence.length} items)`, 16, true);
+    drawText(\`EVIDENCE REGISTRY (\${caseData.evidence.length} items)\`, 16, true);
     y -= 10;
     caseData.evidence.forEach(ev => {
-      drawText(`- ${ev.evidenceRef}: ${ev.description} [${ev.status}]`);
+      drawText(\`- \${ev.evidenceRef}: \${ev.description} [\${ev.status}]\`);
     });
     y -= 20;
 
-    drawText(`RECENT AUDIT LOGS (Immutable Trail)`, 16, true);
+    drawText(\`RECENT AUDIT LOGS (Immutable Trail)\`, 16, true);
     y -= 10;
     auditLogs.forEach(log => {
-      drawText(`[${log.occurredAt.toISOString()}] ${log.action} by ${log.actorId}`, 10);
-      drawText(`  Hash: ${JSON.stringify(log.metadata).substring(0, 40)}...`, 8);
+      drawText(\`[\${log.timestamp.toISOString()}] \${log.action} by \${log.actorId}\`, 10);
+      drawText(\`  Hash: \${log.hash.substring(0, 40)}...\`, 8);
     });
 
     const pdfBytes = await pdfDoc.save();
@@ -84,11 +94,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       metadata: { format: 'PDF', evidenceCount: caseData.evidence.length }
     });
 
-    return new NextResponse(Buffer.from(pdfBytes), {
+    return new NextResponse(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Case_${caseData.caseNumber}_Diary.pdf"`,
+        'Content-Disposition': \`attachment; filename="Case_\${caseData.caseNumber}_Diary.pdf"\`,
       },
     });
   } catch (error) {
@@ -96,3 +106,5 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Failed to generate PDF export' }, { status: 500 });
   }
 }
+`);
+console.log('PDF export route created');

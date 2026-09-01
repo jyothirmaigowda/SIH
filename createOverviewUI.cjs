@@ -1,4 +1,9 @@
+const fs = require('fs');
+const path = require('path');
+const uiDir = 'app/(protected)/cases/[caseId]/overview';
+if (!fs.existsSync(uiDir)) fs.mkdirSync(uiDir, { recursive: true });
 
+fs.writeFileSync(path.join(uiDir, 'page.tsx'), `
 'use client';
 
 import { useState, useEffect, use } from 'react';
@@ -16,7 +21,7 @@ export default function OverviewPage({ params }: { params: Promise<{ caseId: str
 
   const fetchCaseDetails = async () => {
     try {
-      const res = await fetch(`/api/cases/${caseId}`);
+      const res = await fetch(\`/api/cases/\${caseId}\`);
       if (res.ok) {
         const data = await res.json();
         setCaseData(data);
@@ -31,7 +36,7 @@ export default function OverviewPage({ params }: { params: Promise<{ caseId: str
   const handleExport = async () => {
     setExporting(true);
     try {
-      const res = await fetch(`/api/cases/${caseId}/export`);
+      const res = await fetch(\`/api/cases/\${caseId}/export\`);
       if (!res.ok) throw new Error('Export failed');
       
       const blob = await res.blob();
@@ -39,7 +44,7 @@ export default function OverviewPage({ params }: { params: Promise<{ caseId: str
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `Case_${caseData.caseNumber}_Diary.pdf`;
+      a.download = \`Case_Diary.pdf\`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -93,3 +98,5 @@ export default function OverviewPage({ params }: { params: Promise<{ caseId: str
     </div>
   );
 }
+`);
+console.log('Overview UI created');
