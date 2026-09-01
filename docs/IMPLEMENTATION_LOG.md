@@ -29,3 +29,15 @@ pm run build completed successfully. Playwright smoke test (	ests/e2e/smoke.spec
   - Built React client component pp/(auth)/login/page.tsx with error handling and Suspense wrapper.
   - Added seeded users for testing: IO001, SUP001, LEG001, CFG001 (password: sims123).
 - **Tests run:** TypeScript build passed successfully. API integration tested. Playwright Chromium install encountered network timeout (ECONNRESET) but test code is in place (	ests/e2e/auth.spec.ts).
+
+## Phase 2: Documents Vault
+- **Status:** COMPLETE
+- **Timestamp:** 2026-09-01T22:13:27
+- **Actions Taken:**
+  - Implemented secure local storage utility (lib/storage/index.ts) checking magic bytes and assigning sanitized UUID storage keys.
+  - Implemented API GET & POST /api/cases/[caseId]/documents to fetch and upload case-specific documents within a Prisma transaction (creating Document and DocumentVersion linked entities).
+  - Designed POST /api/documents/[documentId]/versions to accept replacement uploads, safely incrementing version numbers without overwriting previous files.
+  - Implemented GET /api/documents/[documentId]/download to dynamically fetch files from local backend storage, bypassing public directories. Set Cache-Control header to prevent browser caching anomalies on identical routes.
+  - Configured append-only audit events (DOCUMENT_UPLOADED, DOCUMENT_DOWNLOADED) embedding specific hashes.
+  - Built the DocumentsPage UI client with Suspense boundaries.
+- **Tests run:** E2E Playwright testing suite (	ests/e2e/documents.spec.ts) achieved 100% pass rate executing file uploads, rendering verifications, replacement upload testing, and file download verifications via headless Chromium.

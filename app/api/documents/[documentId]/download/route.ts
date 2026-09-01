@@ -1,14 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { checkCaseAccess } from '@/lib/auth/authorization';
+import { getStoragePath } from '@/lib/storage';
+import { writeAuditEvent } from '@/lib/audit';
+import fs from 'fs';
 
-// Phase 2 will implement this endpoint.
-// Stub — returns 501 Not Implemented until that phase completes.
+export async function GET(request: NextRequest, { params }: { params: Promise<{ documentId: string }> }) {
+  const { documentId } = await params;
+  const userId = request.headers.get('x-sims-user-id');
+  const userRole = request.headers.get('x-sims-user-role') || '';
 
-export async function GET(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 2 }, { status: 501 });
-}
-export async function POST(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 2 }, { status: 501 });
-}
-export async function PATCH(request: NextRequest) {
-  return NextResponse.json({ error: 'Not implemented', phase: 2 }, { status: 501 });
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const url = new URL(request.url);
+  const versionParam = url.searchParams.get('v');
+
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    include: {
+      versions: versionParam 
+        ? { where: { versionNumber: parseInt(versionParam) } } 
+        : { orderBy: { versionNumber: 'desc' }, take: 1 }
+    }
+  });
+
+  if (!document || document.versions.length === 0) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  const access = await checkCaseAccess(userId, document.caseId);
+  if (!access.allowed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const targetVersion = document.versions[0];
+
+  try {
+    const absolutePath = getStoragePath(targetVersion.storageKey);
+    const fileBuffer = fs.readFileSync(absolutePath);
+
+    await writeAuditEvent({
+      actorId: userId,
+      actorRole: userRole,
+      action: 'DOCUMENT_DOWNLOADED',
+      caseId: document.caseId,
+      resourceType: 'Document',
+      resourceId: document.id,
+      result: 'SUCCESS',
+      metadata: { version: targetVersion.versionNumber, hash: targetVersion.sha256Hash }
+    });
+
+    const response = new NextResponse(fileBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': targetVersion.mimeType,
+        'Content-Disposition': `attachment; filename="${targetVersion.originalFilename}"`,
+        'Content-Length': targetVersion.sizeBytes.toString(),
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Download error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
